@@ -1,4 +1,5 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
@@ -39,6 +40,10 @@ dependencies {
     testImplementation(TestingLib.JUNIT_JUPITER)
 }
 
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_11}"
+}
+
 gradlePlugin {
     plugins {
         create(PluginCoordinates.ID) {
@@ -61,10 +66,15 @@ pluginBundle {
             displayName = PluginBundle.DISPLAY_NAME
         }
     }
+
+    mavenCoordinates {
+        groupId = MavenCoordinates.GROUP
+        artifactId = MavenCoordinates.ID
+    }
 }
 
-val spaceUsername: String by project
-val spacePassword: String by project
+val spaceUsername: String? by project
+val spacePassword: String? by project
 
 publishing {
     publications {
@@ -79,8 +89,8 @@ publishing {
             name = "spaceMaven"
             url = uri("https://maven.pkg.jetbrains.space/headlessideas/p/grp/maven-snapshot")
             credentials {
-                username = spaceUsername
-                password = spacePassword
+                username = spaceUsername ?: System.getenv("JB_SPACE_CLIENT_ID")
+                password = spacePassword ?: System.getenv("JB_SPACE_CLIENT_SECRET")
             }
         }
     }
@@ -128,7 +138,7 @@ tasks.register("reformatAll") {
 tasks.register("preMerge") {
     description = "Runs all the tests/verification tasks on both top level and included build."
 
-    dependsOn(":check")
+    dependsOn("check")
     dependsOn("validatePlugins")
 }
 
