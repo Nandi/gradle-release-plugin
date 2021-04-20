@@ -10,8 +10,8 @@ job("publish") {
     startOn {
         gitPush {
             branchFilter {
-                +"ref/heads/develop"
-                +"ref/heads/main"
+                +"refs/heads/develop"
+                +"refs/heads/main"
             }
         }
     }
