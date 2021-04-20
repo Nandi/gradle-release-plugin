@@ -6,18 +6,29 @@ job("Build and verify") {
     }
 }
 
-job("publish release candidate") {
+job("publish") {
     startOn {
         gitPush {
             branchFilter {
                 +"ref/heads/develop"
+                +"ref/heads/main"
             }
         }
     }
 
     container(displayName = "Run publish script", image = "openjdk:16-alpine") {
         kotlinScript { api ->
-            api.gradlew("publishSpaceMavenPublicationToSpaceMavenRepository", "-Preckon.stage=rc")
+            val stage = if (api.gitBranch() == "ref/heads/develop") {
+                "rc"
+            } else {
+                "final"
+            }
+
+            val publishKey = Secrets("gradle_publish_key")
+            val publishSecret = Secrets("gradle_publish_secret")
+
+            api.gradlew("publishSpaceMavenPublicationToSpaceMavenRepository", "-Preckon.stage=$stage")
+            api.gradlew("publishPlugins", "-Preckon.stage=$stage", "-Pgradle.publish.key=$publishKey", "-Pgradle.publish.secret=$publishSecret")
         }
     }
 }
