@@ -1,10 +1,23 @@
-job("Build and publish") {
-    gradlew("openjdk:15-alpine", "preMerge")
-    container(displayName = "Run publish script", image = "openjdk:15-alpine") {
+job("Build and verify") {
+    container(displayName = "build, test and lint check", image = "openjdk:16-alpine") {
         kotlinScript { api ->
-            if (api.gitBranch() == "refs/heads/develop") {
-                api.gradlew("publishSpaceMavenPublicationToSpaceMavenRepository -Preckon.stage=rc")
+            api.gradlew("preMerge")
+        }
+    }
+}
+
+job("publish release candidate") {
+    startOn {
+        gitPush {
+            branchFilter {
+                +"ref/heads/develop"
             }
+        }
+    }
+
+    container(displayName = "Run publish script", image = "openjdk:16-alpine") {
+        kotlinScript { api ->
+            api.gradlew("publishSpaceMavenPublicationToSpaceMavenRepository", "-Preckon.stage=rc")
         }
     }
 }
