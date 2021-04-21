@@ -166,3 +166,5 @@ tasks.create("setupPluginUploadFromEnvironment") {
         System.setProperty("gradle.publish.secret", secret)
     }
 }
+
+tasks.publishPlugins.orNull?.dependsOn("setupPluginUploadFromEnvironment")
