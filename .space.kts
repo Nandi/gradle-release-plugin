@@ -10,25 +10,27 @@ job("publish") {
     startOn {
         gitPush {
             branchFilter {
-                +"refs/heads/develop"
-                +"refs/heads/main"
+                +"develop".branch()
+                +"main".branch()
             }
         }
     }
 
     container(displayName = "Run publish script", image = "openjdk:16-alpine") {
+        env["GRADLE_PUBLISH_KEY"] = Secrets("gradle_publish_key")
+        env["GRADLE_PUBLISH_SECRET"] = Secrets("gradle_publish_secret")
+
         kotlinScript { api ->
-            val stage = if (api.gitBranch() == "ref/heads/develop") {
+            val stage = if (api.gitBranch() == "develop".branch()) {
                 "rc"
             } else {
                 "final"
             }
-
-            val publishKey = Secrets("gradle_publish_key")
-            val publishSecret = Secrets("gradle_publish_secret")
-
             api.gradlew("publishSpaceMavenPublicationToSpaceMavenRepository", "-Preckon.stage=$stage")
-            api.gradlew("publishPlugins", "-Preckon.stage=$stage", "-Pgradle.publish.key=$publishKey", "-Pgradle.publish.secret=$publishSecret")
+            api.gradlew("setupPluginUploadFromEnvironment")
+            api.gradlew("publishPlugins", "-Preckon.stage=$stage")
         }
     }
 }
+
+fun String.branch() = "refs/heads/$this"
