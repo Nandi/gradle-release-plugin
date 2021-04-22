@@ -30,16 +30,11 @@ job("publish to maven") {
     }
 
     container(displayName = "Run publish script", image = "openjdk:16-alpine") {
-        env["GRADLE_PUBLISH_KEY"] = Secrets("gradle_publish_key")
-        env["GRADLE_PUBLISH_SECRET"] = Secrets("gradle_publish_secret")
-
         kotlinScript { api ->
-            val stage = if (api.gitBranch() == "main".branch()) {
-                "final"
-            } else {
-                "rc"
-            }
-            api.gradlew("publishSpaceMavenPublicationToSpaceMavenRepository", "-Preckon.stage=$stage")
+            val stage = if (api.gitBranch() != "main".branch()) {
+                "-Preckon.stage=rc"
+            } else ""
+            api.gradlew("publishSpaceMavenPublicationToSpaceMavenRepository", stage)
         }
     }
 }
@@ -63,7 +58,7 @@ job("publish to gradle plugin repository") {
         env["GRADLE_PUBLISH_SECRET"] = Secrets("gradle_publish_secret")
 
         kotlinScript { api ->
-            api.gradlew("publishPlugins", "-Preckon.stage=final")
+            api.gradlew("publishPlugins")
         }
     }
 }
