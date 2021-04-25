@@ -23,6 +23,11 @@ job("publish to maven") {
             }
         }
     }
+    git {
+        refSpec {
+            +"refs/tags/*:refs/tags/*"
+        }
+    }
     container(displayName = "build, test and lint check", image = "openjdk:16-alpine") {
         kotlinScript { api ->
             api.gradlew("preMerge")
@@ -45,6 +50,11 @@ job("publish to gradle plugin repository") {
             branchFilter {
                 +"main".branch()
             }
+        }
+    }
+    git {
+        refSpec {
+            +"refs/tags/*:refs/tags/*"
         }
     }
     container(displayName = "build, test and lint check", image = "openjdk:16-alpine") {
