@@ -25,13 +25,13 @@ open class ReleaseExtension @Inject constructor(
     private val mainBranchProperty = objectFactory.property(String::class.java).convention("master")
     private val developBranchProperty = objectFactory.property(String::class.java).convention("develop")
     private val releaseBranchPrefixProperty = objectFactory.property(String::class.java).convention("release")
-    private val releaseScopesProperty = objectFactory.listProperty(String::class.java).convention(listOf("rc", "final"))
+    private val releaseStagesProperty = objectFactory.listProperty(String::class.java).convention(listOf("rc", "final"))
     private val remoteProperty = objectFactory.property(String::class.java).convention("origin")
 
     private val scope: String = providerFactory.gradleProperty(SCOPE_PROP).forUseAtConfigurationTime().getOrElse("minor")
     val stage: String? = providerFactory.gradleProperty(STAGE_PROP).forUseAtConfigurationTime().orNull
 
-    private val versionService: VersionService by lazy { VersionService(gitService.repository, releaseScopesProperty.get(), stage, scope) }
+    private val versionService: VersionService by lazy { VersionService(gitService.repository, releaseStagesProperty.get(), stage, scope) }
 
     val gitService: GitService by lazy { GitService(project.rootProject.layout.projectDirectory.asFile, mainBranch, developBranch, releaseBranchPrefix) }
 
@@ -75,17 +75,17 @@ open class ReleaseExtension @Inject constructor(
         set(value) = releaseBranchPrefixProperty.set(value)
 
     /**
-     * This is provider for the releaseScopes property.
+     * This is provider for the releaseStages property.
      */
-    val releaseScopesProvider: Provider<List<String>>
-        get() = releaseScopesProperty
+    val releaseStagesProvider: Provider<List<String>>
+        get() = releaseStagesProperty
 
     /**
      * This is releaseBranchPrefix property.
      */
-    var releaseScopes: MutableList<String>
-        get() = releaseScopesProperty.get()
-        set(value) = releaseScopesProperty.set(value)
+    var releaseStages: MutableList<String>
+        get() = releaseStagesProperty.get()
+        set(value) = releaseStagesProperty.set(value)
 
     /**
      * This is provider for the remote property.
