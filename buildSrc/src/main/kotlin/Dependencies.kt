@@ -1,13 +1,13 @@
 object Versions {
-    const val KTLINT = "0.40.0"
-    const val JUNIT = "5.7.1"
+    const val KTLINT = "0.41.0"
+    const val JUNIT = "5.7.2"
     const val RECKON = "0.13.0"
-    const val JGIT = "5.11.0.202103091610-r"
+    const val JGIT = "5.11.1.202105131744-r"
 }
 
 object BuildPluginsVersion {
-    const val DETEKT = "1.16.0"
-    const val KOTLIN = "1.4.32"
+    const val DETEKT = "1.17.0"
+    const val KOTLIN = "1.5.0"
     const val KTLINT = "10.0.0"
     const val VERSIONS_PLUGIN = "0.38.0"
     const val RECKON_PLUGIN = "0.13.0"

@@ -41,7 +41,7 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_11}"
+    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_1_8}"
 }
 
 gradlePlugin {
