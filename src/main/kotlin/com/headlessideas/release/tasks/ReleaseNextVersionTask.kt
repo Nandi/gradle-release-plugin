@@ -33,7 +33,7 @@ abstract class ReleaseNextVersionTask : DefaultReleaseTask() {
         }
 
         // Create version tag
-        extension.gitService.tag(version, version)
+        extension.gitService.tag("${extension.tagPrefix}$version", version)
 
         // Push main branch and tags to remote
         with(extension.gitService) {

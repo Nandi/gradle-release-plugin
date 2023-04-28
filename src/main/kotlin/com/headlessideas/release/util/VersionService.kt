@@ -1,6 +1,8 @@
 package com.headlessideas.release.util
 
 import org.ajoberstar.reckon.core.Reckoner
+import org.ajoberstar.reckon.core.Scope
+import org.ajoberstar.reckon.core.ScopeCalculator
 import org.ajoberstar.reckon.core.Version
 import org.eclipse.jgit.lib.Repository
 import java.util.*
@@ -16,9 +18,12 @@ class VersionService(
     private val reckoner: Reckoner
 
     init {
+        val scopeCalculator = ScopeCalculator.ofUserString { _ -> scope.toOptional() }
+
         reckoner = Reckoner.builder()
             .git(repo)
-            .scopeCalc { scope.toOptional() }
+            .scopeCalc(scopeCalculator)
+            .defaultInferredScope(Scope.MINOR)
             .stages(*stages.toTypedArray())
             .stageCalc { _, _ -> stage.toOptional() }
             .build()
@@ -28,5 +33,5 @@ class VersionService(
         return reckoner.reckon()
     }
 
-    private fun <T : Any?> T.toOptional(): Optional<T> = Optional.ofNullable(this)
+    private fun <T : Any> T?.toOptional(): Optional<T> = Optional.ofNullable(this)
 }

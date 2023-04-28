@@ -1,10 +1,8 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version BuildPluginsVersion.KOTLIN
     id("io.gitlab.arturbosch.detekt") version BuildPluginsVersion.DETEKT
-    id("org.jlleitschuh.gradle.ktlint") version BuildPluginsVersion.KTLINT
     id("com.github.ben-manes.versions") version BuildPluginsVersion.VERSIONS_PLUGIN
     id("org.ajoberstar.reckon") version BuildPluginsVersion.RECKON_PLUGIN
 
@@ -16,60 +14,52 @@ plugins {
 group = "com.headlessideas"
 
 reckon {
-    scopeFromProp()
-    stageFromProp("rc", "final")
+    calcScopeFromProp()
+    stages("rc", "final")
+    calcStageFromProp()
 }
 
 repositories {
     google()
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation(gradleApi())
-    implementation(VersioningLib.RECKON_CORE)
-    implementation(VersioningLib.JGIT) {
+    implementation(Versioning.reckonCore)
+    implementation(Versioning.jgit) {
         exclude(group = "org.apache.httpcomponents", module = "httpclient")
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
-    implementation(VersioningLib.JGIT_APACHE)
+    implementation(Versioning.jgitApache)
 
-    testImplementation(platform(TestingLib.JUNIT_BOM))
-    testImplementation(TestingLib.JUNIT_JUPITER)
+    testImplementation(platform(Junit.bom))
+    testImplementation(Junit.jupiter)
+
+    testImplementation(Kotest.core)
+    testImplementation(Kotest.runner)
+    testImplementation(Testing.mockk)
+    testImplementation(Testing.strikt)
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "${JavaVersion.VERSION_1_8}"
+
+kotlin {
+    jvmToolchain(17)
 }
 
 gradlePlugin {
+    website.set(PluginBundle.WEBSITE)
+    vcsUrl.set(PluginBundle.VCS)
     plugins {
         create(PluginCoordinates.ID) {
             group = PluginCoordinates.GROUP
             id = PluginCoordinates.ID
-            implementationClass = PluginCoordinates.IMPLEMENTATION_CLASS
-        }
-    }
-}
-
-// Configuration Block for the Plugin Marker artifact on Plugin Central
-pluginBundle {
-    website = PluginBundle.WEBSITE
-    vcsUrl = PluginBundle.VCS
-    description = PluginBundle.DESCRIPTION
-    tags = PluginBundle.TAGS
-
-    plugins {
-        getByName(PluginCoordinates.ID) {
             displayName = PluginBundle.DISPLAY_NAME
+            description = PluginBundle.DESCRIPTION
+            implementationClass = PluginCoordinates.IMPLEMENTATION_CLASS
+            tags.set(PluginBundle.TAGS)
         }
-    }
-
-    mavenCoordinates {
-        groupId = MavenCoordinates.GROUP
-        artifactId = MavenCoordinates.ID
     }
 }
 
@@ -96,29 +86,8 @@ publishing {
     }
 }
 
-ktlint {
-    debug.set(false)
-    version.set(Versions.KTLINT)
-    verbose.set(true)
-    android.set(false)
-    outputToConsole.set(true)
-    ignoreFailures.set(false)
-    enableExperimentalRules.set(true)
-    disabledRules.add("no-wildcard-imports")
-    filter {
-        exclude("**/generated/**")
-        include("**/kotlin/**")
-    }
-}
-
 detekt {
     config = rootProject.files("config/detekt/detekt.yml")
-    reports {
-        html {
-            enabled = true
-            destination = file("build/reports/detekt.html")
-        }
-    }
 }
 
 tasks.withType<DependencyUpdatesTask> {

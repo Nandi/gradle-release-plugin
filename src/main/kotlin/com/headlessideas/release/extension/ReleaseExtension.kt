@@ -10,7 +10,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage", "unused", "MemberVisibilityCanBePrivate")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 open class ReleaseExtension @Inject constructor(
     private val project: Project,
     objectFactory: ObjectFactory,
@@ -27,9 +27,10 @@ open class ReleaseExtension @Inject constructor(
     private val releaseBranchPrefixProperty = objectFactory.property(String::class.java).convention("release")
     private val releaseStagesProperty = objectFactory.listProperty(String::class.java).convention(listOf("rc", "final"))
     private val remoteProperty = objectFactory.property(String::class.java).convention("origin")
+    private val tagPrefixProperty = objectFactory.property(String::class.java).convention("")
 
-    private val scope: String = providerFactory.gradleProperty(SCOPE_PROP).forUseAtConfigurationTime().getOrElse("minor")
-    val stage: String? = providerFactory.gradleProperty(STAGE_PROP).forUseAtConfigurationTime().orNull
+    private val scope: String = providerFactory.gradleProperty(SCOPE_PROP).getOrElse("minor")
+    val stage: String? = providerFactory.gradleProperty(STAGE_PROP).orNull
 
     private val versionService: VersionService by lazy { VersionService(gitService.repository, releaseStagesProperty.get(), stage, scope) }
 
@@ -99,6 +100,19 @@ open class ReleaseExtension @Inject constructor(
     var remote: String
         get() = remoteProperty.get()
         set(value) = remoteProperty.set(value)
+
+    /**
+     * This is provider for the mainBranch property.
+     */
+    val tagPrefixProvider: Provider<String>
+        get() = tagPrefixProperty
+
+    /**
+     * This is mainBranch property.
+     */
+    var tagPrefix: String
+        get() = tagPrefixProperty.get()
+        set(value) = tagPrefixProperty.set(value)
 
     fun version(): Version = versionService.version()
 }
