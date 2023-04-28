@@ -42,6 +42,7 @@ Configuration happens via the `releaseConfig` block:
     releaseBranchPrefix = "release"
     releaseScopes = mutableListOf("rc", "final")
     remoteName = "origin"
+    tagPrefix = "subproject-v"
 }
 ```
 
